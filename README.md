@@ -1,3 +1,14 @@
+# 🦞 OpenClaw SnApper — Multi-App Workspace Platform
+
+> **This is a fork of [OpenClaw](https://github.com/openclaw/openclaw) with the SnApper platform added.**
+> 
+> SnApper transforms OpenClaw from a single-session chat interface into a **multi-app workspace platform** 
+> with tabbed SnApps. The first SnApp is **Workorder Manager** for project-bound goal-oriented development.
+> 
+> See [AGENTS.md](AGENTS.md) for development details.
+
+---
+
 # 🦞 OpenClaw — Personal AI Assistant
 
 <p align="center">
