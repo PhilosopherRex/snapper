@@ -172,6 +172,119 @@ export interface SnApp {
 // API Types
 // =============================================================================
 
+/** Tab definition for UI registration */
+export interface TabDefinition {
+  /** Unique tab ID (assigned by API) */
+  id?: string;
+  /** Display label */
+  label: string;
+  /** Short label for narrow tabs */
+  shortLabel?: string;
+  /** Icon emoji or path */
+  icon?: string;
+  /** Component identifier */
+  component: string;
+  /** Whether tab is closable */
+  closable?: boolean;
+  /** Whether tab is active */
+  active?: boolean;
+}
+
+/** Tab event types */
+export type TabEventType = 'activated' | 'closed' | 'updated';
+
+/** Tab event */
+export interface TabEvent {
+  type: TabEventType;
+  tabId: string;
+}
+
+/** Panel position */
+export type PanelPosition = 'left' | 'right' | 'bottom';
+
+/** Panel definition for UI registration */
+export interface PanelDefinition {
+  /** Unique panel ID (assigned by API) */
+  id?: string;
+  /** Panel title */
+  title: string;
+  /** Icon emoji or path */
+  icon?: string;
+  /** Component identifier */
+  component: string;
+  /** Panel position */
+  position: PanelPosition;
+  /** Whether panel is expanded */
+  expanded?: boolean;
+  /** Default width/height */
+  size?: number;
+}
+
+/** Toast notification types */
+export type ToastType = 'info' | 'success' | 'warning' | 'error';
+
+/** Toast options */
+export interface ToastOptions {
+  /** Toast message */
+  message: string;
+  /** Toast type */
+  type: ToastType;
+  /** Duration in milliseconds (0 = persistent) */
+  duration?: number;
+}
+
+/** Command arguments */
+export interface CommandArgs {
+  /** Positional arguments */
+  positional: string[];
+  /** Named options */
+  options: Record<string, string>;
+  /** Flag arguments */
+  flags: Set<string>;
+  /** Raw command line */
+  raw: string;
+}
+
+/** Command execution context */
+export interface CommandContext {
+  /** Current session ID */
+  sessionId: string;
+  /** Reply function */
+  reply: (message: string) => void;
+  /** Show progress indicator */
+  showProgress: (message: string) => {
+    update: (message: string) => void;
+    complete: (message?: string) => void;
+  };
+}
+
+/** Command result */
+export interface CommandResult {
+  success: boolean;
+  message?: string;
+  data?: unknown;
+}
+
+/** Command definition */
+export interface CommandDefinition {
+  /** Command name */
+  name: string;
+  /** Command description */
+  description: string;
+  /** Command handler */
+  handler: (args: CommandArgs, context: CommandContext) => Promise<CommandResult> | CommandResult;
+}
+
+/** Persist options for state storage */
+export interface PersistOptions {
+  /** Encrypt the stored data */
+  encrypted?: boolean;
+  /** Time-to-live in milliseconds */
+  ttl?: number;
+  /** Synchronous write (default: false) */
+  sync?: boolean;
+}
+
 /** Context provided to SnApps about the current session */
 export interface SnAppContext {
   /** Unique session identifier */
@@ -209,7 +322,7 @@ export interface BusMessage {
   timestamp: number;
 }
 
-/** Command registration */
+/** SnApp command registration (simplified) */
 export interface SnAppCommand {
   /** Command name (e.g., "/wo") */
   name: string;
