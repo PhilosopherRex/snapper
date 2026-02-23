@@ -1,110 +1,229 @@
-## OpenClaw Vision
+# SnApper Vision
 
-OpenClaw is the AI that actually does things.
-It runs on your devices, in your channels, with your rules.
+SnApper transforms OpenClaw from a single-session chat interface into a **multi-app workspace platform** — an **agentic OS** where the OpenClaw agent controls, manages, and interacts with tab-apps (SnApps).
 
-This document explains the current state and direction of the project.
-We are still early, so iteration is fast.
-Project overview and developer docs: [`README.md`](README.md)
-Contribution guide: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+This document explains the vision and direction of the SnApper project.
 
-OpenClaw started as a personal playground to learn AI and build something genuinely useful:
-an assistant that can run real tasks on a real computer.
-It evolved through several names and shells: Warelay -> Clawdbot -> Moltbot -> OpenClaw.
+---
 
-The goal: a personal assistant that is easy to use, supports a wide range of platforms, and respects privacy and security.
+## What is SnApper?
 
-The current focus is:
+**SnApper** = Apps that **Snap** into OpenCl**aw**
 
-Priority:
+SnApper is a meta-tab system that enables:
 
-- Security and safe defaults
-- Bug fixes and stability
-- Setup reliability and first-run UX
+- **Multi-App Workspace**: Run multiple specialized apps within OpenClaw
+- **First-Class SnApps**: Each SnApp has its own UI, state, and lifecycle
+- **Agent Control**: The OpenClaw agent can control, manage, and interact with SnApps
+- **Context Preservation**: Switch between SnApps without losing state
+- **Extensibility**: Third-party developers can build SnApps
 
-Next priorities:
+### The Core Insight
 
-- Supporting all major model providers
-- Improving support for major messaging channels (and adding a few high-demand ones)
-- Performance and test infrastructure
-- Better computer-use and agent harness capabilities
-- Ergonomics across CLI and web frontend
-- Companion apps on macOS, iOS, Android, Windows, and Linux
+OpenClaw is a powerful personal AI assistant, but it's currently constrained to a single chat session. SnApper breaks this constraint by introducing:
 
-Contribution rules:
+1. **Two-Layer Tab System**: Classic OpenClaw tabs + SnApp tabs
+2. **SnApp Lifecycle**: Load, activate, suspend, unload with full state management
+3. **Inter-SnApp Communication**: Message bus for coordination
+4. **Session Persistence**: Checkpoint and resume work across sessions
 
-- One PR = one issue/topic. Do not bundle multiple unrelated fixes/features.
-- PRs over ~5,000 changed lines are reviewed only in exceptional circumstances.
-- Do not open large batches of tiny PRs at once; each PR has review cost.
-- For very small related fixes, grouping into one focused PR is encouraged.
+---
 
-## Security
+## Architecture
 
-Security in OpenClaw is a deliberate tradeoff: strong defaults without killing capability.
-The goal is to stay powerful for real work while making risky paths explicit and operator-controlled.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      OpenClaw + SnApper                         │
+├─────────────────────────────────────────────────────────────────┤
+│  [🤖 Chat]  [📊 Overview]  [📋 WM ▼]  [⚙️ Settings]  [+]        │
+│                            │                                    │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │  SnApp Container (Two-layer tabs)                      │   │
+│  │  [📋 ProjectA ✕]  [📋 ProjectB ✕]  [+]  [⋯]            │   │
+│  │                                                          │   │
+│  │  ┌────────────────────────┐  ┌──────────────────────┐   │   │
+│  │  │ Chat Interface         │  │ Context Panel        │   │   │
+│  │  │                        │  │ ┌──────────────────┐ │   │   │
+│  │  │ User: "Implement auth" │  │ │ NORTH-STAR       │ │   │   │
+│  │  │ Agent: "I'll help..."  │  │ │ Build auth system│ │   │   │
+│  │  │                        │  │ │ [✓] [⟳] [ ]     │ │   │   │
+│  │  └────────────────────────┘  └──────────────────────┘   │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│ Workorder     │    │  Your SnApp   │    │  Future       │
+│ Manager       │    │    Here       │    │  SnApp 3      │
+└───────────────┘    └───────────────┘    └───────────────┘
+```
 
-Canonical security policy and reporting:
+---
 
-- [`SECURITY.md`](SECURITY.md)
+## Current Focus
 
-We prioritize secure defaults, but also expose clear knobs for trusted high-power workflows.
+**Group 01: Foundation** ✅ COMPLETE
+- SnApp Registry (discovery, validation)
+- Lifecycle Management (state machine)
+- Core Services (hooks, bus, state)
+- API Surface (complete SnAppApi)
 
-## Plugins & Memory
+**Group 02: Core Engine** 🚧 IN PROGRESS
+- State Persistence Service
+- Checkpoint System (save/restore)
+- Auto-Checkpoint (triggers, compression)
+- Path Sandbox (security)
+- Security Logging (audit trail)
 
-OpenClaw has an extensive plugin API.
-Core stays lean; optional capability should usually ship as plugins.
+**Group 03: Interface Layer** 📋 PLANNED
+- Command System (/wo commands)
+- Session Hooks (lifecycle integration)
+- SnApp Container (UI rendering)
+- WM UI Components (tabs, panels, lists)
+- OpenClaw Integration (navigation mods)
 
-Preferred plugin path is npm package distribution plus local extension loading for development.
-If you build a plugin, host and maintain it in your own repository.
-The bar for adding optional plugins to core is intentionally high.
-Plugin docs: [`docs/tools/plugin.md`](docs/tools/plugin.md)
-Community plugin listing + PR bar: https://docs.openclaw.ai/plugins/community
+**Group 04: Advanced & Polish** 📋 PLANNED
+- Branch Data Model (rewind)
+- Rewind UI (timeline visualization)
+- Final Integration (full stack testing)
+- Documentation & Polish
 
-Memory is a special plugin slot where only one memory plugin can be active at a time.
-Today we ship multiple memory options; over time we plan to converge on one recommended default path.
+---
 
-### Skills
+## SnApp Ecosystem
 
-We still ship some bundled skills for baseline UX.
-New skills should be published to ClawHub first (`clawhub.ai`), not added to core by default.
-Core skill additions should be rare and require a strong product or security reason.
+### Built-in SnApps
 
-### MCP Support
+1. **Workorder Manager** — Project-bound goal-oriented development
+   - Workorder registry (YAML-based)
+   - Checkpoint management
+   - North Star goal tracking
+   - Sub-tab system for workorders
 
-OpenClaw supports MCP through `mcporter`: https://github.com/steipete/mcporter
+### Future SnApp Ideas
 
-This keeps MCP integration flexible and decoupled from core runtime:
+- **Kanban Board** — Visual task management
+- **Code Explorer** — Navigate codebase with AI
+- **Documentation Hub** — Manage project docs
+- **Test Runner** — Visual test management
+- **Deployment Dashboard** — Deploy and monitor
 
-- add or change MCP servers without restarting the gateway
-- keep core tool/context surface lean
-- reduce MCP churn impact on core stability and security
+### Building a SnApp
 
-For now, we prefer this bridge model over building first-class MCP runtime into core.
-If there is an MCP server or feature `mcporter` does not support yet, please open an issue there.
+```typescript
+// index.ts
+import type { SnAppApi, SnAppInstance } from '@openclaw/snapper';
 
-### Setup
+export default async function createMySnApp(api: SnAppApi): Promise<SnAppInstance> {
+  // Register a tab
+  const tabId = api.registerTab({
+    label: 'My SnApp',
+    component: 'my-snapp-main'
+  });
+  
+  // Register a command
+  api.registerCommand({
+    name: 'hello',
+    description: 'Say hello',
+    handler: () => {
+      api.showToast({ message: 'Hello!', type: 'success' });
+      return { success: true };
+    }
+  });
+  
+  // Subscribe to hooks
+  api.onHook('session_start', async ({ sessionId }) => {
+    api.logger.info('Session started:', sessionId);
+  });
+  
+  return {
+    async onActivate() { /* SnApp becomes visible */ },
+    async onSuspend() { /* SnApp hidden */ },
+    async onDestroy() { /* Cleanup */ }
+  };
+}
+```
 
-OpenClaw is currently terminal-first by design.
-This keeps setup explicit: users see docs, auth, permissions, and security posture up front.
+---
 
-Long term, we want easier onboarding flows as hardening matures.
-We do not want convenience wrappers that hide critical security decisions from users.
+## Integration with OpenClaw
 
-### Why TypeScript?
+SnApper is a **platform layer** on top of OpenClaw:
 
-OpenClaw is primarily an orchestration system: prompts, tools, protocols, and integrations.
-TypeScript was chosen to keep OpenClaw hackable by default.
-It is widely known, fast to iterate in, and easy to read, modify, and extend.
+- OpenClaw provides: AI models, channels, tools, skills
+- SnApper provides: Multi-app workspace, SnApp lifecycle, state management
+- Together: An agentic OS where the AI manages specialized apps
 
-## What We Will Not Merge (For Now)
+### Key Integration Points
 
-- New core skills when they can live on ClawHub
-- Full-doc translation sets for all docs (deferred; we plan AI-generated translations later)
-- Commercial service integrations that do not clearly fit the model-provider category
-- Wrapper channels around already supported channels without a clear capability or security gap
-- First-class MCP runtime in core when `mcporter` already provides the integration path
-- Agent-hierarchy frameworks (manager-of-managers / nested planner trees) as a default architecture
-- Heavy orchestration layers that duplicate existing agent and tool infrastructure
+1. **Navigation.ts** — Modified for SnApp tabs
+2. **App-render.ts** — SnApp container rendering
+3. **Session Management** — Hook into start/end
+4. **Prompt Injection** — North Star context
 
-This list is a roadmap guardrail, not a law of physics.
-Strong user demand and strong technical rationale can change it.
+---
+
+## Security Model
+
+SnApper inherits OpenClaw's security philosophy: **strong defaults without killing capability**.
+
+Additional SnApper-specific security:
+
+- **Permission System**: Each SnApp declares required permissions
+- **Path Sandboxing**: SnApps can only access their own directories
+- **Audit Logging**: All SnApp actions logged
+- **Manifest Validation**: SnApp metadata verified before loading
+
+---
+
+## Project Structure
+
+```
+openclaw-snapper/
+├── src/snapper/
+│   ├── core/
+│   │   ├── registry.ts      # SnApp discovery
+│   │   ├── lifecycle.ts     # State machine
+│   │   ├── hooks.ts         # Event routing
+│   │   ├── bus.ts           # Message bus
+│   │   ├── state.ts         # Persistence
+│   │   └── api.ts           # SnApp API surface
+│   ├── ui/                  # UI components (future)
+│   └── types/
+│       └── index.ts         # TypeScript definitions
+└── test/snapper/            # Unit tests
+```
+
+---
+
+## Contribution Guidelines
+
+- One PR = one issue/topic
+- PRs over ~5,000 lines reviewed only in exceptional circumstances
+- Group related small fixes into focused PRs
+- All code must have tests
+- Follow existing TypeScript patterns
+
+---
+
+## Long-Term Vision
+
+**The agentic OS**: A platform where AI agents and human users collaborate through specialized, stateful applications that snap into a unified workspace.
+
+The OpenClaw agent becomes not just a chat assistant, but an **operating system** that:
+- Manages running applications
+- Preserves context across sessions  
+- Orchestrates multi-step workflows
+- Extends itself through SnApps
+
+---
+
+## Related Projects
+
+- [OpenClaw](https://github.com/openclaw/openclaw) — The base AI assistant platform
+- [Workorder Manager](https://github.com/PhilosopherRex/openclaw-workorders) — First SnApp (separate repo)
+
+---
+
+*Last Updated: 2026-02-24*
