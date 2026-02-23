@@ -86,6 +86,36 @@ export type HookName =
   | 'after_tool'         // After tool execution
   | 'tool_error';        // Tool execution error
 
+/** Hook payload types */
+export interface SessionStartPayload { sessionId: string; userId?: string; }
+export interface SessionEndPayload { sessionId: string; duration: number; }
+export interface BeforeAgentPayload { sessionId: string; prompt: string; }
+export interface AfterAgentPayload { sessionId: string; response: string; }
+export interface BeforeToolPayload { sessionId: string; tool: string; args: unknown; }
+export interface AfterToolPayload { sessionId: string; tool: string; result: unknown; }
+export interface ToolErrorPayload { sessionId: string; tool: string; error: Error; }
+
+/** Hook map: event name to payload type */
+export interface HookMap {
+  'session_start': SessionStartPayload;
+  'session_end': SessionEndPayload;
+  'before_agent': BeforeAgentPayload;
+  'after_agent': AfterAgentPayload;
+  'before_tool': BeforeToolPayload;
+  'after_tool': AfterToolPayload;
+  'tool_error': ToolErrorPayload;
+}
+
+/** Hook registration options */
+export interface HookOptions {
+  /** Higher priority handlers execute first (default: 0) */
+  priority?: number;
+  /** Filter function to conditionally execute handler */
+  filter?: (payload: unknown) => boolean;
+  /** Whether to await this handler (default: false) */
+  async?: boolean;
+}
+
 // =============================================================================
 // SnApp State
 // =============================================================================
